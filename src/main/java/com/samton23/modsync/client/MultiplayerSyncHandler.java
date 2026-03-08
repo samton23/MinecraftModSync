@@ -30,10 +30,10 @@ public class MultiplayerSyncHandler {
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof JoinMultiplayerScreen multiplayerScreen)) return;
 
-        // Position: right of the "Add Server" button (width/2 + 4, height - 52, 100x20)
-        // Our button sits at width/2 + 108, height - 52 with width 100
-        int x = multiplayerScreen.width / 2 + 108;
-        int y = multiplayerScreen.height - 52;
+        // Row 2 layout: Edit(w/2-154), Delete(w/2-80), Refresh(w/2-6), Cancel(w/2+68) — each 70px wide
+        // Place after Cancel: w/2 + 68 + 70 + 4 = w/2 + 142
+        int x = multiplayerScreen.width / 2 + 142;
+        int y = multiplayerScreen.height - 28;
 
         syncButton = Button.builder(
             Component.literal("Sync Mods"),
