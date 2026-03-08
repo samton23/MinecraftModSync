@@ -1,0 +1,31 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+
+[[dependencies.modsync]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47.2.0,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.modsync]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="BOTH"
+
+[[mods]]
+modId="modsync"
+version="${file.jarVersion}"
+displayName="ModSync"
+description='''
+Automatically synchronizes client mods with the server modpack.
+Place your mods in the clientmodpack/ folder on the server.
+Clients will auto-download missing mods and disable extra ones on connect.
+'''
+logoFile="modsync.png"
+
+[[contacts]]
+homepage="https://github.com/samton23/MinecraftModSync"
