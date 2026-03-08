@@ -54,6 +54,7 @@ public class PreSyncScreen extends Screen {
 
     private Button cancelButton;
     private Button restartButton;
+    private Button connectButton;
 
     public PreSyncScreen(ServerData serverData, Screen lastScreen) {
         super(Component.literal("ModSync — Pre-connection sync"));
@@ -63,17 +64,26 @@ public class PreSyncScreen extends Screen {
 
     @Override
     protected void init() {
+        // "Restart Minecraft" — shown after downloading mods
+        restartButton = addRenderableWidget(Button.builder(
+            Component.literal("Restart Minecraft"),
+            btn -> restartGame()
+        ).pos(width / 2 - 102, height / 2 + 46).size(100, 20).build());
+        restartButton.visible = false;
+        restartButton.active = false;
+
+        // "Connect Now" — shown when mods are already up-to-date or after non-restart scenarios
+        connectButton = addRenderableWidget(Button.builder(
+            Component.literal("Connect Now"),
+            btn -> connectNow()
+        ).pos(width / 2 + 2, height / 2 + 46).size(100, 20).build());
+        connectButton.visible = false;
+        connectButton.active = false;
+
         cancelButton = addRenderableWidget(Button.builder(
             Component.literal("Cancel"),
             btn -> cancel()
         ).pos(width / 2 - 100, height / 2 + 70).size(200, 20).build());
-
-        restartButton = addRenderableWidget(Button.builder(
-            Component.literal("Restart Minecraft"),
-            btn -> restartGame()
-        ).pos(width / 2 - 100, height / 2 + 48).size(200, 20).build());
-        restartButton.visible = false;
-        restartButton.active = false;
 
         if (started.compareAndSet(false, true)) {
             startSyncThread();
@@ -94,12 +104,11 @@ public class PreSyncScreen extends Screen {
                 List<ModManifestEntry> serverManifest = fetchManifest(host, httpPort);
 
                 if (serverManifest == null) {
-                    // Server doesn't have ModSync (or HTTP not reachable) — connect normally
+                    // Server doesn't have ModSync (or HTTP not reachable) — show connect button
                     state = State.NO_MODSYNC;
-                    statusLine = "Server has no ModSync endpoint — connecting normally...";
-                    ModSync.LOGGER.info("[ModSync] No HTTP response from {}:{}, connecting without pre-sync", host, httpPort);
-                    Thread.sleep(1800);
-                    connectNow();
+                    statusLine = "Server has no ModSync endpoint.";
+                    ModSync.LOGGER.info("[ModSync] No HTTP response from {}:{}, showing connect button", host, httpPort);
+                    showConnectButton();
                     return;
                 }
 
@@ -112,10 +121,9 @@ public class PreSyncScreen extends Screen {
 
                 if (plan.isUpToDate()) {
                     state = State.UP_TO_DATE;
-                    statusLine = "Mods are up to date — connecting...";
-                    ModSync.LOGGER.info("[ModSync] Mods up to date, proceeding with connection");
-                    Thread.sleep(1200);
-                    connectNow();
+                    statusLine = "Mods are up to date.";
+                    ModSync.LOGGER.info("[ModSync] Mods up to date, showing connect button");
+                    showConnectButton();
                     return;
                 }
 
@@ -154,14 +162,14 @@ public class PreSyncScreen extends Screen {
                 statusLine = "Sync complete! Restart to apply changes.";
                 ModSync.LOGGER.info("[ModSync] Pre-sync done — restart required");
 
-                // Show restart button on the render thread
+                // Show restart + connect buttons on the render thread
                 Minecraft.getInstance().execute(() -> {
                     restartButton.visible = true;
                     restartButton.active = true;
+                    connectButton.visible = true;
+                    connectButton.active = true;
                 });
 
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 ModSync.LOGGER.error("[ModSync] Pre-sync error: {}", e.getMessage());
                 state = State.ERROR;
@@ -175,6 +183,13 @@ public class PreSyncScreen extends Screen {
     // -------------------------------------------------------------------------
     // Actions
     // -------------------------------------------------------------------------
+
+    private void showConnectButton() {
+        Minecraft.getInstance().execute(() -> {
+            connectButton.visible = true;
+            connectButton.active = true;
+        });
+    }
 
     /** Fetches manifest JSON from the server's HTTP endpoint. Returns null if not available. */
     private List<ModManifestEntry> fetchManifest(String host, int port) {
