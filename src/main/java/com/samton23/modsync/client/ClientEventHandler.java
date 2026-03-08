@@ -7,8 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.io.File;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.List;
 
 /**
@@ -63,11 +61,18 @@ public class ClientEventHandler {
     }
 
     private static String getServerHost(Minecraft mc) {
-        if (mc.getConnection() == null) return null;
-        SocketAddress addr = mc.getConnection().getRemoteAddress();
-        if (addr instanceof InetSocketAddress inet) {
-            return inet.getHostString();
+        // getCurrentServer() returns the server the client is connected to
+        var serverData = mc.getCurrentServer();
+        if (serverData == null) return null;
+        // ip field may contain "host:port" — strip the port if present
+        String ip = serverData.ip;
+        int colon = ip.lastIndexOf(':');
+        if (colon > 0 && colon < ip.length() - 1) {
+            try {
+                Integer.parseInt(ip.substring(colon + 1));
+                return ip.substring(0, colon);
+            } catch (NumberFormatException ignored) {}
         }
-        return null;
+        return ip;
     }
 }

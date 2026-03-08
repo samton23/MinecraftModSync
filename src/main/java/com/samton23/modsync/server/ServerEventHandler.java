@@ -19,7 +19,7 @@ public class ServerEventHandler {
         if (!ModSyncConfig.ENABLED.get()) return;
 
         // Only runs on the logical server
-        if (event.getEntity().getLevel().isClientSide()) return;
+        if (event.getEntity().level().isClientSide()) return;
 
         List<ModManifestEntry> manifest = ModpackManager.INSTANCE.getManifest();
         int httpPort = ModSyncConfig.HTTP_PORT.get();
