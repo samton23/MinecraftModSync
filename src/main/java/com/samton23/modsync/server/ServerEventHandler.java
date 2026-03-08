@@ -27,8 +27,10 @@ public class ServerEventHandler {
         ModSync.LOGGER.info("[ModSync] Sending manifest ({} mods) to player {}",
             manifest.size(), event.getEntity().getName().getString());
 
+        boolean disableExtraMods = ModSyncConfig.DISABLE_EXTRA_MODS.get();
+
         ModSyncChannel.sendToPlayer(
-            new ModManifestPacket(manifest, httpPort),
+            new ModManifestPacket(manifest, httpPort, disableExtraMods),
             event.getEntity()
         );
     }

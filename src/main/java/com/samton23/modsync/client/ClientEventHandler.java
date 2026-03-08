@@ -37,7 +37,7 @@ public class ClientEventHandler {
         }
 
         // Compute diff
-        ModComparator.SyncPlan plan = ModComparator.compare(serverManifest, modsDir);
+        ModComparator.SyncPlan plan = ModComparator.compare(serverManifest, modsDir, packet.disableExtraMods());
 
         if (plan.isUpToDate()) {
             ModSync.LOGGER.info("[ModSync] Mods are up to date, no sync needed.");
